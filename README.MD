@@ -1,8 +1,9 @@
 Mutirao DevOps
-
-***Instalando Docker***
+---
+Install
 ---
 
+***Instalando Docker***
 ```
 curl -fsSL https://get.docker.com | bash
 ```
@@ -53,10 +54,8 @@ source <(kubectl completion bash)
 echo "source <(kubectl completion bash)" >> ~/.bashrc 
 ```
 
-KubeADM config file:
----
-Kubelet
----
+***KubeADM config file:***
+Kubelet TLS:
 
 ```
 cat <<EOF | tee kubeadm.yaml
@@ -93,7 +92,8 @@ docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ```
 curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.21.0
 ```
-
+Audit LOG
+---
 
 ***Ativando AuditLog***
 
@@ -117,7 +117,7 @@ RequestResponse - log event metadata, request and response bodies. This does not
 --audit-log-maxsize defines the maximum size in megabytes of the audit log file before it gets rotated
 ```
 
-Editando o api server:
+***Editando o api server:***
 vim /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 - --audit-log-maxage=30    
@@ -148,8 +148,7 @@ volumeMounts:
     type: FileOrCreate
 ```
 
-Policy
------------------------
+***Policy***
 ```
 cat <<EOF | tee /etc/kubernetes/audit-policy.yaml 
 apiVersion: audit.k8s.io/v1
@@ -183,8 +182,8 @@ EOF
 ```
 
 
-***Encrypting Secret Data at Rest***
-
+Encrypting Secret Data at Rest
+---
 
 https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/
 
@@ -192,7 +191,7 @@ Criando secret para teste:
 ```
 kubectl create secret generic semcrytoteste --from-literal=senha=teste1 -n kube-system
 ```
-Verificando valor no ETCD
+Verificando valor no ETCD:
 ```
 docker exec -it 83c1098072da etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --key=/etc/kubernetes/pki/etcd/server.key --cert=/etc/kubernetes/pki/etcd/server.crt get /registry/secrets/kube-system/semcrytoteste
 ```
@@ -297,11 +296,10 @@ systemctl restart kubelet.service
 ```
 
 
-
-
-
-Criando SA
+Primeiro pod
 ---
+
+***Criando SA***
 ```
 apiVersion: v1
 kind: Pod
@@ -310,8 +308,7 @@ metadata:
 automountServiceAccountToken: false
 ```
 
-Imutable
----
+***Imutable***
 ```
 apiVersion: v1
 kind: Pod
@@ -333,7 +330,7 @@ spec:
 kubectl expose pod nginx --port=8080 --target-port=8080 --type=NodePort --name=nginx-service
 ```
 
-Adcionando imutabildiade:
+***Adcionando imutabildiade:***
 ```
 apiVersion: v1
 kind: Pod
@@ -353,7 +350,7 @@ spec:
 ```
 
 
-Adicionando tmpfs
+***Adicionando tmpfs:***
 ```
 apiVersion: v1
 kind: Pod
@@ -379,7 +376,7 @@ spec:
 ```
 
 
-Removendo binarios
+***Removendo binarios:***
 ```
 apiVersion: v1
 kind: Pod
@@ -405,7 +402,10 @@ spec:
 
 
 
-Netpol
+Network Policy
+---
+
+***Acessando Cloud Metadata:***
 ```
 curl http://169.254.169.254/latest/meta-data/
 curl http://169.254.169.254/latest/meta-data/public-ipv4
@@ -413,7 +413,7 @@ curl http://169.254.169.254/latest/meta-data/public-ipv4
 
 
 
-Criando um deny all
+***Criando um deny all:***
 ```
 cat <<EOF | tee netpol.yaml
 apiVersion: networking.k8s.io/v1
@@ -434,7 +434,8 @@ spec:
 EOF
 ```
 
-Liberando entranda por outro pod
+***Liberando entranda por outro pod:***
+
 ```
 cat <<EOF | tee netpol.yaml
 apiVersion: networking.k8s.io/v1
@@ -475,7 +476,7 @@ Falco
 ---
 https://sysdig.com/blog/reverse-shell-falco-sysdig-secure/
 
-Install:
+***Install:***
 ```
 curl -s https://falco.org/repo/falcosecurity-3672BA8F.asc | apt-key add -
 echo "deb https://download.falco.org/packages/deb stable main" | tee -a /etc/apt/sources.list.d/falcosecurity.list
@@ -491,7 +492,7 @@ apt-get install -y falco
 
 
 
-Sobre
+***Sobre***
 ```
 
 Let’s create a Falco rule using what we’ve seen so far to detect these reverse shells.
@@ -504,7 +505,7 @@ In the condition section, you can see this Falco rule is detecting any dup syste
 ```
 
 
-Primeira rule:
+***Primeira rule:***
 ```
 - rule: Reverse shell
   desc: Detect reverse shell established remote connection
@@ -517,7 +518,7 @@ Primeira rule:
 ```
 
 
-Testando role:
+***Testando role:***
 ```
 Node: Nginx
 
@@ -530,7 +531,7 @@ Control Plane
 nc  -l 32000
 ```
 
-Segunda role:
+***Segunda role:***
 ```
 - rule: Launch Privileged Container
   desc: Detect the initial process started in a privileged container. Exceptions are made for known trusted images.
@@ -552,15 +553,12 @@ Segunda role:
 OPA
 ---
 
-Deploy:
+***Deploy:***
 ```
 kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.5/deploy/gatekeeper.yaml
 ```
 
-Exclud NS
-
-
----------------------------------------------------------------------
+***Exclud NS***
 ```
 cat > /excludns.yaml <<EOF
 apiVersion: config.gatekeeper.sh/v1alpha1
@@ -574,10 +572,9 @@ spec:
       processes: ["*"]
 EOF
 ```
-----------------------------------------------------------------------
 
 
-Criando o primeiro template:
+***Criando o primeiro template:***
 ```
 cat > /tmp/constrainttemplate.yaml <<EOF
 apiVersion: templates.gatekeeper.sh/v1beta1
@@ -609,7 +606,7 @@ spec:
         }
 EOF
 ```
-Criando constraint: 
+***Criando constraint: ***
 ```
 cat > /tmp/constraint.yaml <<EOF
 apiVersion: constraints.gatekeeper.sh/v1beta1
@@ -623,13 +620,13 @@ spec:
         kinds: ["Pod"]
 EOF
 ```
-Verificando
+***Verificando***
 ```
 kubectl get constraint
 kubectl get constrainttemplate
 ```
 
-Criando pod de teste:
+***Criando pod de teste:***
 ```
 cat > /tmp/example.yaml <<EOF
 apiVersion: v1
@@ -650,8 +647,8 @@ kubectl create -f /tmp/example.yaml
 ```
 
 
-Policy FileSystem:
--------------------------
+***Policy FileSystem:***
+
 ```
 cat > /tmp/constrainttemplate_filesystem.yaml <<EOF
 apiVersion: templates.gatekeeper.sh/v1beta1
@@ -692,7 +689,7 @@ spec:
 EOF
 kubectl apply -f /tmp/constrainttemplate_filesystem.yaml
 ```
-Constraint:
+***Constraint:***
 ```
 cat > /tmp/constraint_filesystem.yaml <<EOF
 apiVersion: constraints.gatekeeper.sh/v1beta1
