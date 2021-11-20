@@ -387,6 +387,7 @@ spec:
 Network Policy
 ---
 https://kubernetes.io/docs/concepts/services-networking/network-policies/
+
 ***Acessando Cloud Metadata:***
 ```
 curl http://169.254.169.254/latest/meta-data/
@@ -516,6 +517,7 @@ OPA
 ---
 
 https://open-policy-agent.github.io/gatekeeper/website/docs/install/
+
 ***Deploy:***
 ```
 kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.5/deploy/gatekeeper.yaml
