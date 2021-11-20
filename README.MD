@@ -1,9 +1,9 @@
 Mutirao DevOps
 ---
-Install
+Install Cluster
 ---
 
-***Instalando Docker***
+***Instalando o Docker***
 ```
 curl -fsSL https://get.docker.com | bash
 ```
@@ -22,7 +22,7 @@ docker info | grep "Cgroup Driver"
 ***Instalando K8S***
 
 
-Carregando modulos
+Carregando módulos:
 ```
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 br_netfilter
@@ -35,7 +35,7 @@ EOF
 sysctl --system
 ```
 
-Adicionando repo + install:
+Adicionando repo do k8s + install:
 ```
 apt-get update && apt-get install -y apt-transport-https ca-certificates curl
 
@@ -48,13 +48,13 @@ apt-get update
 apt-get install -y kubelet kubeadm kubectl
 apt-mark hold kubelet kubeadm kubectl
 ```
-Configurando autocompletion
+Configurando kubectl autocomplete:
 ```
 source <(kubectl completion bash)
 echo "source <(kubectl completion bash)" >> ~/.bashrc 
 ```
 
-***KubeADM config file:***
+***KubeADM utilizando um config file:***
 
 Kubelet TLS:
 
@@ -70,7 +70,7 @@ EOF
 
 ```
 
-Init do cluster
+Init do cluster:
 ```
 kubeadm init --config=kubeadm.yaml 
 kubectl get no
@@ -78,12 +78,10 @@ kubectl get csr
 kubectl certificate approve
 ```
 
-Apply da CNI
+Instalando a  CNI:
 ```
 kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 ```
-
-
 
 ***Instalando Kube-bench***
 ```
@@ -93,6 +91,7 @@ docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ```
 curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.21.0
 ```
+
 Audit LOG
 ---
 
@@ -149,7 +148,7 @@ volumeMounts:
     type: FileOrCreate
 ```
 
-***Policy***
+***Policy:***
 ```
 cat <<EOF | tee /etc/kubernetes/audit-policy.yaml 
 apiVersion: audit.k8s.io/v1
@@ -183,7 +182,7 @@ EOF
 ```
 
 
-Encrypting Secret Data at Rest
+Encrypting Secret Data at Rest 
 ---
 
 https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/
@@ -308,7 +307,7 @@ metadata:
 automountServiceAccountToken: false
 ```
 
-***Imutable***
+***Pod Imutável***
 ```
 apiVersion: v1
 kind: Pod
@@ -330,7 +329,7 @@ spec:
 kubectl expose pod nginx --port=8080 --target-port=8080 --type=NodePort --name=nginx-service
 ```
 
-***Adcionando imutabildiade:***
+***Adcionando imutabilidade:***
 ```
 apiVersion: v1
 kind: Pod
@@ -434,7 +433,7 @@ spec:
 EOF
 ```
 
-***Liberando entranda por outro pod:***
+***Liberando acesso com origem de outro pod:***
 
 ```
 cat <<EOF | tee netpol.yaml
@@ -481,44 +480,27 @@ https://sysdig.com/blog/reverse-shell-falco-sysdig-secure/
 curl -s https://falco.org/repo/falcosecurity-3672BA8F.asc | apt-key add -
 echo "deb https://download.falco.org/packages/deb stable main" | tee -a /etc/apt/sources.list.d/falcosecurity.list
 apt-get update -y
-
 apt-get -y install linux-headers-$(uname -r)
-
-
 apt-get install -y falco
 
 ```
 
 
 
-
-***Sobre***
-```
-
-Let’s create a Falco rule using what we’ve seen so far to detect these reverse shells.
-
-Usually, when a program starts a network connection, the system will open a socket for the network connection. A socket is nothing but a file descriptor with a number assigned by the system. Each open file descriptor in the system has a number assigned and never conflicts with each other. By default, STDIN is assigned with 0, STDOUT with 1 and STDERR with 2.
-
-We’ve seen in the examples above that a reverse shell redirects STDIN and STDOUT to an open socket with a network connection. In the Unix system, this redirection is done via the dup system call.
-
-In the condition section, you can see this Falco rule is detecting any dup system call that duplicates file descriptors in any STDIN, STDOUT and STDERR with a network type file descriptor.
-```
-
-
-***Primeira rule:***
+***Primeira rule: Shell Reversa***
 ```
 - rule: Reverse shell
   desc: Detect reverse shell established remote connection
   condition: evt.type=dup and container and fd.num in (0, 1, 2) and fd.type in ("ipv4", "ipv6")
   output: >
-    Reverse shell connection (user=%user.name %container.info process=%proc.name parent=%proc.pname cmdline=%proc.cmdline terminal=%proc.tty container_id=%container.id image=%container.image.repository fd.name=%fd.name fd.num=%fd.num fd.type=%fd.type fd.sip=%fd.sip)
+    Se liga na shell (user=%user.name %container.info process=%proc.name parent=%proc.pname cmdline=%proc.cmdline terminal=%proc.tty container_id=%container.id image=%container.image.repository fd.name=%fd.name fd.num=%fd.num fd.type=%fd.type fd.sip=%fd.sip)
   priority: WARNING
   tags: [container, shell, mitre_execution]
   append: false
 ```
 
 
-***Testando role:***
+***Testando a role:***
 ```
 Node: Nginx
 
@@ -531,7 +513,7 @@ Control Plane
 nc  -l 32000
 ```
 
-***Segunda role:***
+***Segunda role: container privilegiado***
 ```
 - rule: Launch Privileged Container
   desc: Detect the initial process started in a privileged container. Exceptions are made for known trusted images.
@@ -540,13 +522,10 @@ nc  -l 32000
     and container.privileged=true
     and not falco_privileged_containers
     and not user_privileged_containers
-  output: Privileged container started (user=%user.name user_loginuid=%user.loginuid command=%proc.cmdline %container.info image=%container.image.repository:%container.image.tag)
+  output: container privilegiado aqui se liga (user=%user.name user_loginuid=%user.loginuid command=%proc.cmdline %container.info image=%container.image.repository:%container.image.tag)
   priority: WARNING
   tags: [container, cis, mitre_privilege_escalation, mitre_lateral_movement]
 ```
-
-
-
 
 
 
