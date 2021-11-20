@@ -84,38 +84,21 @@ kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl versio
 ```
 
 ***Instalando Kube-bench***
+https://github.com/aquasecurity/kube-bench
 ```
 docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ```
 ***Instalando Trivy***
+https://github.com/aquasecurity/trivy
 ```
 curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.21.0
 ```
 
 Audit LOG
 ---
+https://kubernetes.io/docs/tasks/debug-application-cluster/audit/
 
 ***Ativando AuditLog***
-
-```
-RequestReceived - The stage for events generated as soon as the audit handler receives the request, and before it is delegated down the handler chain.
-ResponseStarted - Once the response headers are sent, but before the response body is sent. This stage is only generated for long-running requests (e.g. watch).
-ResponseComplete - The response body has been completed and no more bytes will be sent.
-Panic - Events generated when a panic occurred.
-
-
-None - don't log events that match this rule.
-Metadata - log request metadata (requesting user, timestamp, resource, verb, etc.) but not request or response body.
-Request - log event metadata and request body but not response body. This does not apply for non-resource requests.
-RequestResponse - log event metadata, request and response bodies. This does not apply for non-resource requests.
-
-
-
---audit-log-path specifies the log file path that log backend uses to write audit events. Not specifying this flag disables log backend. - means standard out
---audit-log-maxage defined the maximum number of days to retain old audit log files
---audit-log-maxbackup defines the maximum number of audit log files to retain
---audit-log-maxsize defines the maximum size in megabytes of the audit log file before it gets rotated
-```
 
 ***Editando o api server:***
 vim /etc/kubernetes/manifests/kube-apiserver.yaml
@@ -403,7 +386,7 @@ spec:
 
 Network Policy
 ---
-
+https://kubernetes.io/docs/concepts/services-networking/network-policies/
 ***Acessando Cloud Metadata:***
 ```
 curl http://169.254.169.254/latest/meta-data/
@@ -473,7 +456,7 @@ EOF
 
 Falco
 ---
-https://sysdig.com/blog/reverse-shell-falco-sysdig-secure/
+https://falco.org/
 
 ***Install:***
 ```
@@ -532,6 +515,7 @@ nc  -l 32000
 OPA
 ---
 
+https://open-policy-agent.github.io/gatekeeper/website/docs/install/
 ***Deploy:***
 ```
 kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.5/deploy/gatekeeper.yaml
