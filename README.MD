@@ -255,11 +255,10 @@ chown etcd:etcd /var/lib/etcd
 
 
 [WARN] 1.2.11 Ensure that the admission control plugin AlwaysPullImages is set (Manual)
+
 [WARN] 1.2.12 Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used (Manual)
-[PASS] 1.2.13 Ensure that the admission control plugin ServiceAccount is set (Automated)
-[PASS] 1.2.14 Ensure that the admission control plugin NamespaceLifecycle is set (Automated)
+
 [FAIL] 1.2.15 Ensure that the admission control plugin PodSecurityPolicy is set (Automated)
-[PASS] 1.2.16 Ensure that the admission control plugin NodeRestriction is set (Automated)
 ```
 
 - --enable-admission-plugins=NodeRestriction,AlwaysPullImages
