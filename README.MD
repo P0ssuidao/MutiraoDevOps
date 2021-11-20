@@ -55,6 +55,7 @@ echo "source <(kubectl completion bash)" >> ~/.bashrc
 ```
 
 ***KubeADM config file:***
+
 Kubelet TLS:
 
 ```
@@ -605,7 +606,7 @@ spec:
         }
 EOF
 ```
-***Criando constraint: ***
+***Criando constraint:***
 ```
 cat > /tmp/constraint.yaml <<EOF
 apiVersion: constraints.gatekeeper.sh/v1beta1
