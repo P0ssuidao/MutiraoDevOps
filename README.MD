@@ -518,6 +518,8 @@ OPA
 
 https://open-policy-agent.github.io/gatekeeper/website/docs/install/
 
+https://play.openpolicyagent.org/
+
 ***Deploy:***
 ```
 kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.5/deploy/gatekeeper.yaml
