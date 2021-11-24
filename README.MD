@@ -632,7 +632,7 @@ spec:
         violation[{"msg": msg, "details": {}}] {
             c := input_containers[_]
             input_read_only_root_fs(c)
-            msg := sprintf("only read-only root filesystem container is allowed: %v", [c.name])
+            msg := sprintf("So container read-only root filesystem sao permitidos: %v", [c.name])
         }
         input_read_only_root_fs(c) {
             not has_field(c, "securityContext")
