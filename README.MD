@@ -140,17 +140,14 @@ omitStages:
   - "RequestReceived"
 
 rules:
-# log no "read" actions
 - level: None
   verbs: ["get", "watch", "list"]
 
-# log nothing regarding events
 - level: None
   resources:
-  - group: "" # core
+  - group: "" 
     resources: ["events"]
 
-# log nothing coming from some groups
 - level: None
   userGroups: ["system:nodes"]
 
@@ -159,7 +156,6 @@ rules:
   - group: ""
     resources: ["secrets"]
 
-# for everything else log
 - level: Metadata
 EOF
 ```
