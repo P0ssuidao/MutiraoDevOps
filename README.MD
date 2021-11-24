@@ -277,15 +277,34 @@ systemctl restart kubelet.service
 Primeiro pod
 ---
 
-***Criando SA***
+***Criando SA e desativando o automount***
+```
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-sa
+automountServiceAccountToken: false
+```
+***Removendo o automount no spec do pod***
+
 ```
 apiVersion: v1
 kind: Pod
 metadata:
-  name: my-pod
-automountServiceAccountToken: false
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: p0ssuidao/vulne-pod-lab:01
+    name: nginx
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  automountServiceAccountToken: false
+  serviceAccountName: false
 ```
-
 ***Pod Imutável***
 ```
 apiVersion: v1
@@ -302,8 +321,6 @@ spec:
     resources: {}
   dnsPolicy: ClusterFirst
   restartPolicy: Always
-
-
 
 kubectl expose pod nginx --port=8080 --target-port=8080 --type=NodePort --name=nginx-service
 ```
@@ -354,7 +371,7 @@ spec:
 ```
 
 
-***Removendo binarios:***
+***Removendo binarios com startup:***
 ```
 apiVersion: v1
 kind: Pod
@@ -380,7 +397,7 @@ spec:
 
 
 
-Network Policy
+Network Policy:
 ---
 https://kubernetes.io/docs/concepts/services-networking/network-policies/
 
@@ -389,7 +406,6 @@ https://kubernetes.io/docs/concepts/services-networking/network-policies/
 curl http://169.254.169.254/latest/meta-data/
 curl http://169.254.169.254/latest/meta-data/public-ipv4
 ```
-
 
 
 ***Criando um deny all:***
@@ -610,10 +626,10 @@ kubectl create -f /tmp/example.yaml
 ```
 
 
-***Policy FileSystem:***
+***Policy Read-only FileSystem:***
 
 ```
-cat > /tmp/constrainttemplate_filesystem.yaml <<EOF
+cat > constrainttemplate_filesystem.yaml <<EOF
 apiVersion: templates.gatekeeper.sh/v1beta1
 kind: ConstraintTemplate
 metadata:
@@ -632,7 +648,7 @@ spec:
         violation[{"msg": msg, "details": {}}] {
             c := input_containers[_]
             input_read_only_root_fs(c)
-            msg := sprintf("So container read-only root filesystem sao permitidos: %v", [c.name])
+            msg := sprintf("So container com filesystem read-only sao permitidos: %v", [c.name])
         }
         input_read_only_root_fs(c) {
             not has_field(c, "securityContext")
@@ -650,11 +666,11 @@ spec:
             object[field]
         }
 EOF
-kubectl apply -f /tmp/constrainttemplate_filesystem.yaml
+kubectl apply -f constrainttemplate_filesystem.yaml
 ```
 ***Constraint:***
 ```
-cat > /tmp/constraint_filesystem.yaml <<EOF
+cat > constraint_filesystem.yaml <<EOF
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: ReadOnlyRootFilesystem
 metadata:
@@ -665,5 +681,5 @@ spec:
       - apiGroups: [""]
         kinds: ["Pod"]
 EOF
-kubectl apply -f /tmp/constraint_filesystem.yaml
+kubectl apply -f constraint_filesystem.yaml
 ```
